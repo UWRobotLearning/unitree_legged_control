@@ -56,7 +56,7 @@ public:
     void lowUdpSend()
     {
 
-        low_udp.SetSend(low_cmd);
+        //low_udp.SetSend(low_cmd);
         low_udp.Send();
     }
 
@@ -113,21 +113,21 @@ long low_count = 0;
 //     printf("highCmdCallback ending !\t%ld\n\n", ::high_count++);
 // }
 
-void lowCmdCallback(const unitree_legged_msgs::LowCmd::ConstPtr &msg)
-{
+// void lowCmdCallback(const unitree_legged_msgs::LowCmd::ConstPtr &msg)
+// {
 
-    printf("lowCmdCallback is running !\t%ld\n", low_count);
+//     printf("lowCmdCallback is running !\t%ld\n", low_count);
 
-    custom.low_cmd = rosMsg2Cmd(msg);
+//     //custom.low_cmd = rosMsg2Cmd(msg);
 
-    unitree_legged_msgs::LowState low_state_ros;
+//     unitree_legged_msgs::LowState low_state_ros;
 
-    low_state_ros = state2rosMsg(custom.low_state);
+//     low_state_ros = state2rosMsg(custom.low_state);
 
-    pub_low.publish(low_state_ros);
+//     pub_low.publish(low_state_ros);
 
-    printf("lowCmdCallback ending!\t%ld\n\n", ::low_count++);
-}
+//     printf("lowCmdCallback ending!\t%ld\n\n", ::low_count++);
+// }
 
 // LoopFunc loop_control("control_loop", custom.dt,    boost::bind(&Custom::RobotControl, &custom));
 //     LoopFunc loop_udpSend("udp_send",     custom.dt, 3, boost::bind(&Custom::UDPSend,      &custom));
@@ -145,15 +145,21 @@ int main(int argc, char **argv)
 
     ros::NodeHandle nh;
 
-    printf("Initiating ros_udp..\n");
+    printf("Initiating ros_udp..\n"); 
+
+
+    //custom.lowUdpSend();
+
+    custom.low_udp.SetSend(custom.low_cmd);
+
     if (strcasecmp(argv[1], "LOWLEVEL") == 0)
     {
         printf("LOWLEVEL \n");
-        sub_low = nh.subscribe("low_cmd", 1, lowCmdCallback);
+        //sub_low = nh.subscribe("low_cmd", 1, lowCmdCallback);
         pub_low = nh.advertise<unitree_legged_msgs::LowState>("low_state", 1);
 
-        LoopFunc loop_udpSend("low_udp_send", 0.002, 3, boost::bind(&Custom::lowUdpSend, &custom));
-        LoopFunc loop_udpRecv("low_udp_recv", 0.002, 3, boost::bind(&Custom::lowUdpRecv, &custom));
+        LoopFunc loop_udpSend("low_udp_send", 0.02, 3, boost::bind(&Custom::lowUdpSend, &custom));
+        LoopFunc loop_udpRecv("low_udp_recv", 0.02, 3, boost::bind(&Custom::lowUdpRecv, &custom));
 
 
         loop_udpSend.start();

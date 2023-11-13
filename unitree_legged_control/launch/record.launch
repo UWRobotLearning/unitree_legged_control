@@ -1,0 +1,30 @@
+<!--
+   Record data in following bags:
+
+   - highdim (IMU, cameras, ..)
+
+   - lowdim (force sensors, pose)
+
+  -->
+
+<launch>
+    <arg name="ctrl_level" default="highlevel"/>
+
+    <arg name="record" default="false"/>
+
+    <node pkg="unitree_legged_control" type="ros_udp" name="node_ros_udp" output="screen" args="$(arg ctrl_level)"/>
+
+    <node pkg = "rosbag" type = "record" name = "record_highdim" args = "record -O ~/bagfiles/a1bag.bag
+    if="$(arg record)"/>
+
+    <param name="control_level" value="$(arg ctrl_level)"/>
+</launch>
+
+
+<launch>
+    <arg name="ctrl_level" default="highlevel"/>
+
+    <node pkg="unitree_legged_control" type="ros_udp" name="node_ros_udp" output="screen" args="$(arg ctrl_level)"/>
+
+    <param name="control_level" value="$(arg ctrl_level)"/>
+</launch>
