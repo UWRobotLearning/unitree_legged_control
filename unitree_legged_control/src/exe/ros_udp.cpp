@@ -150,7 +150,7 @@ int main(int argc, char **argv)
 
     //custom.lowUdpSend();
 
-    //custom.low_udp.SetSend(custom.low_cmd);
+    custom.low_udp.SetSend(custom.low_cmd);
 
     if (strcasecmp(argv[1], "LOWLEVEL") == 0)
     {

@@ -19,4 +19,3 @@ uint32 crc
 #Cartesian position            # will delete
 #Cartesian velocity            # will delete
 #Cartesian velocity_w            # will delete
-

@@ -64,12 +64,12 @@ int main(int argc, char **argv)
             low_cmd_ros.motorCmd[FR_2].Kp = 5.0;
             low_cmd_ros.motorCmd[FR_2].Kd = 1.0;
 
-            low_cmd_ros.motorCmd[FR_0].q = 0.0;
+            low_cmd_ros.motorCmd[FR_0].q = 0.0; //0.5 * sin(2 * M_PI / 5.0 * motiontime * 1e-3);
             low_cmd_ros.motorCmd[FR_0].dq = 0.0;
             low_cmd_ros.motorCmd[FR_0].Kp = 5.0;
             low_cmd_ros.motorCmd[FR_0].Kd = 1.0;
 
-            low_cmd_ros.motorCmd[FR_1].q = 0.0;
+            low_cmd_ros.motorCmd[FR_1].q = 0.0; // 0.5 * sin(2 * M_PI / 5.0 * motiontime * 1e-3);
             low_cmd_ros.motorCmd[FR_1].dq = 0.0;
             low_cmd_ros.motorCmd[FR_1].Kp = 5.0;
             low_cmd_ros.motorCmd[FR_1].Kd = 1.0;
