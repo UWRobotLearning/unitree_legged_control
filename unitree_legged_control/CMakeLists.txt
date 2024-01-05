@@ -5,6 +5,7 @@ set(CMAKE_CXX_FLAGS "-O3 -fPIC -std=c++11")
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    tf2_ros
     geometry_msgs
     unitree_legged_msgs
     unitree_legged_sdk
@@ -50,4 +51,8 @@ add_dependencies(control_via_keyboard ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 add_executable(twist_sub src/exe/twist_sub.cpp)
 target_link_libraries(twist_sub ${EXTRA_LIBS} ${catkin_LIBRARIES})
 add_dependencies(twist_sub ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(ros_transform src/exe/ros_transform.cpp)
+target_link_libraries(ros_transform ${EXTRA_LIBS} ${catkin_LIBRARIES})
+add_dependencies(ros_transform ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 

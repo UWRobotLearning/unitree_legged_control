@@ -1,17 +1,22 @@
 #include <ros/ros.h>
 #include <unitree_legged_msgs/LowState.h>
 #include "unitree_legged_sdk/unitree_legged_sdk.h"
-#include <tf/transform_broadcaster.h>
-#include <tf/transform_listener.h>
-#include "PoseParse.h"
-#include "control.h"
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include "StateEstimation.h"
+#include "convert.h"
 
 using namespace UNITREE_LEGGED_SDK;
 
 
-PoseParse::void Transform(POSE* p, RPY* R, XYZ* t);{
 
+void LowStateCallBack(const unitree_legged_msgs :: LowState :: ConstPtr& msg>){
 
+}
+void InitPose(POSE* P, float mean, float std){
+    
 }
 
 
@@ -19,56 +24,48 @@ int main(int argc, char** argv){
     ros::init(argc, argv, "quad transform");
     ros::NodeHandle nh;
 
-    tf::TransformListener tf_ls;
-    tf::TransformBroadcaster tf_br;
+    tf2_ros::TransformBroadcaster tf_broadcaster;
 
 
-    tf::Transform quad_tf;
-
-    // Hip Joints
-    tf::Transform hj1;
-    tf::Transform hj2;
-    tf::Transform hj3;
-    tf::Transform hj4;
-
-    //Shoulder Joints
-    tf::Transform sj1;
-    tf::Transform sj2;
-    tf::Transform sj3;
-    tf::Transform sj4;
-
-    //Ankle Joints
-    tf::Transform aj1;
-    tf::Transform aj2;
-    tf::Transform aj3;
-    tf::Transform aj4;
-
-    //Foots .. feet lul
-    tf::Transform f1;
-    tf::Transform f2;
-    tf::Transform f3;
-    tf::Transform f4;
-
-
+    ros::Subscriber Sub = nh.subscribe("/low_state", 10, LowStateCallBack);
+    
+    
     //Setting initial positions and orientations.
+    for (const auto & [ PoseFrame, PoseValue ] : PoseVector){
+            InitPose(&PoseValue, 0., 0.);
+    
+    }
 
     ros::Rate loop_rate(10);
     while(ros::ok()){
         //send transformations from body to world
 
         // {B} => {W}
+        for (const auto & [ PoseFrame, PoseValue ] : PoseVector){
 
-        try{
+            geometry_msgs::TransformStamped transform_stamped;
+            transform_stamped.header.stamp = ros::Time::now();
+            transform_stamped.header.frame_id = "base_frame";
+            transform_stamped.child_frame_id  =  PoseFrame;
 
-            //Compute SE(3)
+            transform_stamped.transform.translation.x = PoseValue.t->x;
+            transform_stamped.transform.translation.y = PoseValue.t->y;
+            transform_stamped.transform.translation.z = PoseValue.t->Z;
+
+            tf2::Quaternion quaternion;
+
+            quaternion.setRPY(PoseValue.R->roll, PoseValue.R->pitch, PoseValue.R->yaw)
+            transform_stamped.transform.rotation.x =  quaternion.x();
+            transform_stamped.transform.rotation.y =  quaternion.x();
+            transform_stamped.transform.rotation.z =  quaternion.x();
+            transform_stamped.transform.rotation.w =  quaternion.x();
+
+            tf_broadcaster.sendTransform(transform_stamped);
         }
 
-        catch(tf::TransformException &e){
-
-            //Catch errors eg: runtime error, zero div, sensor issue, etc..
-        }
         loop_rate.sleep();
         ros::spinOnce();
     }
+    return 0;
 
 }
