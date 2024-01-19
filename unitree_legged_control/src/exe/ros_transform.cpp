@@ -12,7 +12,7 @@ using namespace UNITREE_LEGGED_SDK;
 
 
 
-void LowStateCallBack(const unitree_legged_msgs :: LowState :: ConstPtr& msg>){
+void LowStateCallBack(const unitree_legged_msgs :: LowState :: ConstPtr& msg){
 
 }
 void InitPose(POSE* P, float mean, float std){
@@ -31,7 +31,7 @@ int main(int argc, char** argv){
     
     
     //Setting initial positions and orientations.
-    for (const auto & [ PoseFrame, PoseValue ] : PoseVector){
+    for (auto & [ PoseFrame, PoseValue ] : PoseVector){
             InitPose(&PoseValue, 0., 0.);
     
     }
@@ -50,11 +50,11 @@ int main(int argc, char** argv){
 
             transform_stamped.transform.translation.x = PoseValue.t->x;
             transform_stamped.transform.translation.y = PoseValue.t->y;
-            transform_stamped.transform.translation.z = PoseValue.t->Z;
+            transform_stamped.transform.translation.z = PoseValue.t->z;
 
             tf2::Quaternion quaternion;
 
-            quaternion.setRPY(PoseValue.R->roll, PoseValue.R->pitch, PoseValue.R->yaw)
+            quaternion.setRPY(PoseValue.R->roll, PoseValue.R->pitch, PoseValue.R->yaw);
             transform_stamped.transform.rotation.x =  quaternion.x();
             transform_stamped.transform.rotation.y =  quaternion.x();
             transform_stamped.transform.rotation.z =  quaternion.x();

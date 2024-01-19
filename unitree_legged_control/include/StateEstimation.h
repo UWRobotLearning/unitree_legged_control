@@ -68,9 +68,9 @@ unordered_map<string, POSE>PoseVector=
 {"RR3", RR3},
 {"RL3", RL3},
 
-}
+};
 
-void LowStateCallBack(const unitree_legged_msgs :: LowState :: ConstPtr& msg>)
+void LowStateCallBack(const unitree_legged_msgs :: LowState :: ConstPtr& msg);
 void InitPose(POSE* P, float mean, float std);
 
 #endif
