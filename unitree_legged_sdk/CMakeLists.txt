@@ -45,22 +45,22 @@ target_link_libraries(example_velocity ${EXTRA_LIBS})
 add_executable(example_torque examples/example_torque.cpp)
 target_link_libraries(example_torque ${EXTRA_LIBS})
 
-add_executable(example_walk examples/example_walk.cpp)
-target_link_libraries(example_walk ${EXTRA_LIBS})
+# add_executable(example_walk examples/example_walk.cpp)
+# target_link_libraries(example_walk ${EXTRA_LIBS})
 
 # one pc multi process
-add_executable(lcm_server_high examples/lcm_server_high.cpp)
-target_link_libraries(lcm_server_high ${EXTRA_LIBS})
+# add_executable(lcm_server_high examples/lcm_server_high.cpp)
+# target_link_libraries(lcm_server_high ${EXTRA_LIBS})
 
 add_executable(lcm_server_low examples/lcm_server_low.cpp)
 target_link_libraries(lcm_server_low ${EXTRA_LIBS})
 
 # multi pc
-add_executable(udp_send_test examples/multi_pc_udp_send.cpp)
-target_link_libraries(udp_send_test ${EXTRA_LIBS})
+# add_executable(udp_send_test examples/multi_pc_udp_send.cpp)
+# target_link_libraries(udp_send_test ${EXTRA_LIBS})
 
-add_executable(udp_recv_test examples/multi_pc_udp_recv.cpp)
-target_link_libraries(udp_recv_test ${EXTRA_LIBS})
+# add_executable(udp_recv_test examples/multi_pc_udp_recv.cpp)
+# target_link_libraries(udp_recv_test ${EXTRA_LIBS})
 
 add_executable(lcm_receiver_low examples/lcm_receiver_low.cpp)
 target_link_libraries(lcm_receiver_low ${EXTRA_LIBS})

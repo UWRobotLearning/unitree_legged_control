@@ -12,7 +12,8 @@
 
 using namespace UNITREE_LEGGED_SDK;
 
-static void OutputState();
+static void OutputLowState();
+static void OutputHighState();
 
 class Custom
 {
@@ -20,7 +21,7 @@ public:
 
 
     UDP low_udp;
-    //UDP high_udp;
+    UDP high_udp;
     Safety safe;
 
     HighCmd high_cmd = {0};
@@ -38,20 +39,21 @@ public:
     Custom()
         : 
         safe(LeggedType::Aliengo),
-        low_udp(LOWLEVEL)
+        low_udp(LOWLEVEL),
+        // high_udp(HIGHLEVEL, HighLevelType::Sport)
+        high_udp(8090 , "192.168.123.161", 8082, sizeof(HighCmd), sizeof(HighState))
         //low_udp(LOWLEVEL, 8091, "192.168.123.10", 8007),
         //high_udp(8090, "192.168.123.161", 8082, sizeof(HighCmd), sizeof(HighState))
     {
-        //high_udp.InitCmdData(high_cmd);
+        high_udp.InitCmdData(high_cmd);
         low_udp.InitCmdData(low_cmd);
     }
 
     void highUdpSend()
     {
-        // printf("high udp send is running\n");
 
-        //high_udp.SetSend(high_cmd);
-        //high_udp.Send();
+        high_udp.SetSend(high_cmd);
+        high_udp.Send();
     }
 
     void lowUdpSend()
@@ -66,53 +68,60 @@ public:
         low_udp.Recv();
         low_udp.GetRecv(low_state);
 
-        OutputState();
+        OutputLowState();
     }
 
     void highUdpRecv()
     {
-        // printf("high udp recv is running\n");
+ 
 
-        // high_udp.Recv();
-        // high_udp.GetRecv(high_state);
+        high_udp.Recv();
+        high_udp.GetRecv(high_state);
+
+        OutputHighState();
+
     }
 };
 
 
 unitree_legged_msgs::LowState low_state_ros;
-//ros::Subscriber sub_high;
+unitree_legged_msgs::HighState high_state_ros;
+ros::Subscriber sub_high;
 ros::Subscriber sub_low;
 
-//ros::Publisher pub_high;
+ros::Publisher pub_high;
 ros::Publisher pub_low;
 
 Custom custom;
 
-static inline void OutputState(){
+static inline void OutputLowState(){
 
     low_state_ros = state2rosMsg(custom.low_state);
-
     pub_low.publish(low_state_ros);
 
+}
+
+
+static inline void OutputHighState(){
+     high_state_ros = state2rosMsg(custom.high_state);
+    pub_high.publish(high_state_ros);
 }
 
 long high_count = 0;
 long low_count = 0;
 
-// void highCmdCallback(const unitree_legged_msgs::HighCmd::ConstPtr &msg)
-// {
-//     printf("highCmdCallback is running !\t%ld\n", ::high_count);
+void highCmdCallback(const unitree_legged_msgs::HighCmd::ConstPtr &msg)
+{
+    printf("highCmdCallback is running !\t%ld\n", ::high_count);
 
-//     custom.high_cmd = rosMsg2Cmd(msg);
+    custom.high_cmd = rosMsg2Cmd(msg);
 
-//     unitree_legged_msgs::HighState high_state_ros;
+    high_state_ros = state2rosMsg(custom.high_state);
 
-//     high_state_ros = state2rosMsg(custom.high_state);
+    pub_high.publish(high_state_ros);
 
-//     pub_high.publish(high_state_ros);
-
-//     printf("highCmdCallback ending !\t%ld\n\n", ::high_count++);
-// }
+    printf("highCmdCallback ending !\t%ld\n\n", ::high_count++);
+}
 
 // void lowCmdCallback(const unitree_legged_msgs::LowCmd::ConstPtr &msg)
 // {
@@ -150,8 +159,9 @@ int main(int argc, char **argv)
 
 
     //custom.lowUdpSend();
-
+    custom.high_cmd.mode = 1;
     custom.low_udp.SetSend(custom.low_cmd);
+    custom.high_udp.SetSend(custom.high_cmd);
 
     if (strcasecmp(argv[1], "LOWLEVEL") == 0)
     {
@@ -170,22 +180,22 @@ int main(int argc, char **argv)
 
         //printf("low level runing!\n");
     }
-    // else if (strcasecmp(argv[1], "HIGHLEVEL") == 0)
-    // {
-    //     printf("HIGHLEVEL \n");
-    //     sub_high = nh.subscribe("high_cmd", 1, highCmdCallback);
-    //     pub_high = nh.advertise<unitree_legged_msgs::HighState>("high_state", 1);
+    else if (strcasecmp(argv[1], "HIGHLEVEL") == 0)
+    {
+        printf("HIGHLEVEL \n");
+        // sub_high = nh.subscribe("high_cmd", 1, highCmdCallback);
+        pub_high = nh.advertise<unitree_legged_msgs::HighState>("high_state", 1);
 
-    //     LoopFunc loop_udpSend("high_udp_send", 0.002, 3, boost::bind(&Custom::highUdpSend, &custom));
-    //     LoopFunc loop_udpRecv("high_udp_recv", 0.002, 3, boost::bind(&Custom::highUdpRecv, &custom));
+        LoopFunc loop_udpSend("high_udp_send", 0.02, 3, boost::bind(&Custom::highUdpSend, &custom));
+        LoopFunc loop_udpRecv("high_udp_recv", 0.02, 3, boost::bind(&Custom::highUdpRecv, &custom));
 
-    //     loop_udpSend.start();
-    //     loop_udpRecv.start();
+        loop_udpSend.start();
+        loop_udpRecv.start();
 
-    //     ros::spin();
+        ros::spin();
 
-    //     // printf("high level runing!\n");
-    // }
+        // printf("high level runing!\n");
+    }
     else
     {
         std::cout << "Control level name error! Can only be highlevel or lowlevel(not case sensitive)" << std::endl;

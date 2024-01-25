@@ -8,26 +8,43 @@
 #include "comm.h"
 #include "unitree_legged_sdk/quadruped.h"
 #include <pthread.h>
+#include <stdint.h>
 
 namespace UNITREE_LEGGED_SDK
 {
 
+
+
+        
     constexpr int UDP_CLIENT_PORT = 8080;                       // local port
     constexpr int UDP_SERVER_PORT = 8007;                       // target port
     constexpr char UDP_SERVER_IP_BASIC[] = "192.168.123.10";    // target IP address
     constexpr char UDP_SERVER_IP_SPORT[] = "192.168.123.161";   // target IP address
 
+
+    typedef enum {
+            nonBlock = 0x00,
+            block = 0x01,
+            blockTimeout = 0x02,
+    } RecvEnum;
+
     // Notice: User defined data(like struct) should add crc(4Byte) at the end.
     class UDP {
-	public:
+	public:     
         UDP(uint8_t level, HighLevelType highControl = HighLevelType::Basic);  // unitree dafault IP and Port
         //UDP(uint8_t level, uint16_t localPort, const char* targetIP, uint16_t targetPort);
+        UDP(uint16_t localPort, const char* targetIP, uint16_t targetPort,
+      int sendLength, int recvLength, bool initiativeDisconnect = false, RecvEnum recvType = RecvEnum::nonBlock);
+
         UDP(uint16_t localPort, const char* targetIP, uint16_t targetPort, int sendLength, int recvLength, int useTimeOut = -1);
         UDP(uint16_t localPort, int sendLength, int recvLength, bool isServer = false); // as server, client IP and port can change
         ~UDP();
         void InitCmdData(HighCmd& cmd);
         void InitCmdData(LowCmd& cmd);
         void SwitchLevel(int level);
+
+        void SetIpPort(const char* targetIP, uint16_t targetPort);  // if not indicated at constructor function
+        void SetRecvTimeout(int time);                              // use in RecvEnum::blockTimeout  (unit: ms)
         void SetDisconnectTime(float callback_dt, float disconnectTime);  // disconnect for another IP to connect
         void SetAccessibleTime(float callback_dt, float accessibleTime);  // if can access data
 
