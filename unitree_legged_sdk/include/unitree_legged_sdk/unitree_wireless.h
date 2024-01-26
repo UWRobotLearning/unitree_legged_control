@@ -1,5 +1,4 @@
 #include "unitree_legged_sdk/unitree_legged_sdk.h"
-#include "unitree_legged_sdk/unitree_joystick.h"
 #include <math.h>
 #include <iostream>
 #include <unistd.h>
@@ -10,16 +9,13 @@ class WIRE_LESS_CONTROL{
 
     private:
 
-    static WIRE_LESS_CONTROL* wirelesscontrol;
     static WIRE_LESS_CONTROL* UdpSingleton(uint8_t level);
 
     public:
 
     WIRE_LESS_CONTROL(uint8_t level) : safe(LeggedType::A1), udp(level){
-        wirelesscontrol = nullptr;
         udp.InitCmdData(cmd);
     }
-
 
     public :
     Safety safe;
