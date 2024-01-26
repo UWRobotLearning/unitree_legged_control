@@ -12,6 +12,7 @@
 #include "lcm.h"
 #include "quadruped.h"
 #include <boost/bind.hpp>
+#include "unitree_legged_sdk/unitree_joystick.h"
 
 #define UT UNITREE_LEGGED_SDK    //short name
 

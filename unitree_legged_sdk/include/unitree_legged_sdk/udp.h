@@ -33,8 +33,8 @@ namespace UNITREE_LEGGED_SDK
 	public:     
         UDP(uint8_t level, HighLevelType highControl = HighLevelType::Basic);  // unitree dafault IP and Port
         //UDP(uint8_t level, uint16_t localPort, const char* targetIP, uint16_t targetPort);
-        UDP(uint16_t localPort, const char* targetIP, uint16_t targetPort,
-      int sendLength, int recvLength, bool initiativeDisconnect = false, RecvEnum recvType = RecvEnum::nonBlock);
+    //     UDP(uint16_t localPort, const char* targetIP, uint16_t targetPort,
+    //   int sendLength, int recvLength, bool initiativeDisconnect = false, RecvEnum recvType = RecvEnum::nonBlock);
 
         UDP(uint16_t localPort, const char* targetIP, uint16_t targetPort, int sendLength, int recvLength, int useTimeOut = -1);
         UDP(uint16_t localPort, int sendLength, int recvLength, bool isServer = false); // as server, client IP and port can change
