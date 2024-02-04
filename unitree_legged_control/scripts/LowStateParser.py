@@ -20,26 +20,6 @@ def bag2csv(bag):
 
     bagfile = rosbag.Bag(os.path.join(bagpath, bag))
 
-    #40 data points
-    columnNames = [
-                   "rpy", "accelerometer", "gyroscope", "quaternion", 
-                   
-                   "FR0 q", "FR0 dq", "FR0 tauEst",
-                   "FR1 q", "FR1 dq", "FR1 tauEst",
-                   "FR2 q", "FR2 dq", "FR2 tauEst",
-
-                   "FL0 q", "FL0 dq", "FL0 tauEst",
-                   "FL1 q", "FL1 dq", "FL1 tauEst",
-                   "FL2 q", "FL2 dq", "FL2 tauEst",
-
-                   "RR0 q", "RR0 dq", "RR0 tauEst",
-                   "RR1 q", "RR1 dq", "RR1 tauEst",
-                   "RR2 q", "RR2 dq", "RR2 tauEst",
-
-                   "RL0 q", "RL0 dq", "RL0 tauEst",
-                   "RL1 q", "RL1 dq", "RL1 tauEst",
-                   "RL2 q", "RL2 dq", "RL2 tauEst",
-                   ]
     data = [] 
 
     first_t = -1
