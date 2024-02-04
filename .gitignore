@@ -1,3 +1,0 @@
-*.DS_Store
-/unitree_legged_control/unitree_legged_control/csvs/*.csv
-/unitree_legged_control/unitree_legged_control/launch/bagfiles/*.bag
