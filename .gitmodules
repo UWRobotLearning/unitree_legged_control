@@ -1,0 +1,3 @@
+[submodule "unitree_legged_sdk"]
+	path = unitree_legged_sdk
+	url = https://github.com/RN0H/unitree_legged_sdk.git
