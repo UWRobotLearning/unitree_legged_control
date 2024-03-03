@@ -135,7 +135,7 @@ void Custom::RobotControl()
 
 }
 
-int main(void) 
+int main(int argc, char **argv) 
 {
     std::cout << "Communication level is set to HIGH-level." << std::endl
               << "WARNING: Make sure the robot is standing on the ground." << std::endl
@@ -163,7 +163,7 @@ int main(void)
     loop_control.start();
 
     while(1){
-        high_state_ros = state2rosMsg(custom.high_state);
+        high_state_ros = state2rosMsg(custom.state);
         pub_high.publish(high_state_ros);
         sleep(10);
     };

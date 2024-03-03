@@ -12,7 +12,7 @@ using namespace UNITREE_LEGGED_SDK;
 
 void highStateCallback(const unitree_legged_msgs::HighState::ConstPtr &msg)
 {
-    printf("yaw = %f\n", msg->imu.rpy[2]);
+    printf("yaw = %f\n", msg->imu.quaternion[2]);
 }
 
 void lowStateCallback(const unitree_legged_msgs::LowState::ConstPtr &msg)

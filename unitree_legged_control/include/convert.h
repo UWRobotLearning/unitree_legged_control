@@ -155,7 +155,6 @@ unitree_legged_msgs::IMU state2rosMsg(UNITREE_LEGGED_SDK::IMU &state)
     {
         ros_msg.gyroscope[i] = state.gyroscope[i];
         ros_msg.accelerometer[i] = state.accelerometer[i];
-        ros_msg.rpy[i] = state.rpy[i];
     }
 
     ros_msg.temperature = state.temperature;
@@ -259,10 +258,10 @@ unitree_legged_msgs::HighState state2rosMsg(UNITREE_LEGGED_SDK::HighState &state
     ros_msg.sidePosition    = state.sidePosition;
 
     //Gonna add this so that we can receive motor state along with the remaining high state values
-    for (int i(0); i < 20; i++)
-    {
-        ros_msg.motorState[i] = state2rosMsg(state.motorState[i]);
-    }
+    // for (int i(0); i < 20; i++)
+    // {
+    //     ros_msg.motorState[i] = state2rosMsg(state.motorState[i]);
+    // }
 
 
     for (int i(0); i < 4; i++)
@@ -303,7 +302,7 @@ UNITREE_LEGGED_SDK::HighCmd rosMsg2Cmd(const geometry_msgs::Twist::ConstPtr &msg
 
     cmd.forwardSpeed = msg->linear.x;
     cmd.sideSpeed = msg->linear.y;
-    cmd.yawSpeed = msg->angular.z;
+    cmd.rotateSpeed = msg->angular.z;
 
     cmd.mode = 2;
     return cmd;

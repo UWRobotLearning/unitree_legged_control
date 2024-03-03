@@ -28,13 +28,13 @@ include_directories(
     ${unitree_legged_sdk_INCLUDE_DIRS}
 )
 
-add_executable(ros_example_walk src/exe/ros_walk_example.cpp)
-target_link_libraries(ros_example_walk ${EXTRA_LIBS} ${catkin_LIBRARIES})
-add_dependencies(ros_example_walk ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_executable(ros_example_walk src/exe/ros_walk_example.cpp)
+# target_link_libraries(ros_example_walk ${EXTRA_LIBS} ${catkin_LIBRARIES})
+# add_dependencies(ros_example_walk ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(ros_example_position src/exe/ros_position_example.cpp)
-target_link_libraries(ros_example_position ${EXTRA_LIBS} ${catkin_LIBRARIES})
-add_dependencies(ros_example_position ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_executable(ros_example_position src/exe/ros_position_example.cpp)
+# target_link_libraries(ros_example_position ${EXTRA_LIBS} ${catkin_LIBRARIES})
+# add_dependencies(ros_example_position ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(state_sub src/exe/state_sub.cpp)
 target_link_libraries(state_sub ${EXTRA_LIBS} ${catkin_LIBRARIES})
