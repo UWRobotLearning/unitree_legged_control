@@ -11,14 +11,14 @@
 #include <geometry_msgs/Twist.h>
 
 using namespace UNITREE_LEGGED_SDK;
-using namespace std;
 
 float Fspeed = 0.f;
 float Sspeed = 0.f;
 float footraiseheight = 0.f;
 float bodyheight      = 0.f;
-uint8_t A1mode = 0;
 float r = 0.f,p = 0.f,y = 0.f;
+
+uint8_t A1mode = 0;
 
 ros::Publisher pub_high;
 unitree_legged_msgs::HighState high_state_ros;
@@ -64,8 +64,8 @@ void Custom::RobotControl()
     cmd.bodyHeight      = bodyheight;
     cmd.forwardSpeed    = Fspeed;
     cmd.sideSpeed       = Sspeed;
-
-    
+    cmd.roll            = r;
+    cmd.pitch           = p;
 
     udp.SetSend(cmd);
 
@@ -142,7 +142,7 @@ void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
     if (rc->channels[2] > 1600)
     {
         A1mode = 1;
-        r = -rpyFactor * (rc->channels[0] - 1501)/500;
+        r = -rpyFactor * (rc->channels[2] - 1501)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
@@ -150,7 +150,7 @@ void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
     if (rc->channels[2] < 1400)
     {
         A1mode = 1;
-        r = -rpyFactor * (rc->channels[0] - 1501)/500;
+        r = -rpyFactor * (rc->channels[2] - 1501)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
@@ -158,7 +158,7 @@ void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
     if (rc->channels[3] > 1600)
     {
         A1mode = 1;
-        p = -rpyFactor * (rc->channels[1] - 1501)/500;
+        p = -rpyFactor * (rc->channels[3] - 1501)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
@@ -166,7 +166,7 @@ void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
     if (rc->channels[3] < 1400)
     {
         A1mode = 1;
-        p = -rpyFactor * (rc->channels[1] - 1501)/500;
+        p = -rpyFactor * (rc->channels[3] - 1501)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
