@@ -1,0 +1,165 @@
+#include <ros/ros.h>
+#include <unitree_legged_msgs/HighCmd.h>
+#include <unitree_legged_msgs/HighState.h>
+#include <unitree_legged_msgs/LowCmd.h>
+#include <unitree_legged_msgs/LowState.h>
+#include "unitree_legged_sdk/unitree_legged_sdk.h"
+#include "mavros_msgs/RCIn.h"
+#include "convert.h"
+#include <chrono>
+#include <pthread.h>
+#include <geometry_msgs/Twist.h>
+
+using namespace UNITREE_LEGGED_SDK;
+using namespace std;
+
+float Fspeed = 0.f;
+float Sspeed = 0.f;
+float footraiseheight = 0.f;
+float bodyheight      = 0.f;
+uint8_t A1mode = 0;
+float r = 0.f,p = 0.f,y = 0.f;
+
+class Custom
+{
+public:
+    Custom(uint8_t level): safe(LeggedType::A1), udp(8090, "192.168.123.161", 8082, sizeof(HighCmd), sizeof(HighState)){
+        udp.InitCmdData(cmd);
+    }
+    void UDPRecv();
+    void UDPSend();
+    void RobotControl();
+
+    Safety safe;
+    UDP udp;
+    HighCmd cmd = {0};
+    HighState state = {0};
+    int motiontime = 0;
+    float dt = 0.002;     // 0.001~0.01
+
+};
+
+
+void Custom::UDPRecv()
+{
+    udp.Recv();
+}
+
+void Custom::UDPSend()
+{  
+    udp.Send();
+}
+
+void Custom::RobotControl() 
+{
+    udp.GetRecv(state);
+    cmd.mode = A1mode;
+    cmd.footRaiseHeight = footraiseheight;
+    cmd.bodyHeight      = bodyheight;
+    cmd.forwardSpeed    = Fspeed;
+    cmd.sideSpeed       = Sspeed;
+
+    udp.SetSend(cmd);
+
+}
+
+void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
+    if(rc->channels.empty())
+    {   
+        return;
+    }
+    /*
+    Right joystick
+    channel 0 for (left, right). channel space (2000, 1000) => sideSpeed cmd space (-1, +1)
+    channel 1 for (up,   down) . channel space (2000, 1000) => forwardSpeed cmd space (-1, +1)
+
+    Left joystick
+    roll pitch yaw?
+    channel 3 for (left, right) . channel space (1050, 1950) => sideSpeed cmd space (-1, +1)
+    channel 2 for (up,   down)  . channel space (1950, 1050) => sideSpeed smd space (-1, +1)
+    */
+    A1mode = 0;      // 0:idle, default stand      1:forced stand     2:walk continuously
+    footraiseheight = 0;
+    bodyheight = 0;
+
+    /* Init rpy in place of eulers[3] (which is used in 3.3.1)*/
+    
+    r = 0.f;
+    p = 0.f;
+    y = 0.f;
+
+    /*Init forward and side speed in place of velocity[2](which is used in 3.2)*/
+
+    if (rc->channels[0] > 1600)
+    {
+        A1mode = 2;
+        Sspeed = -0.5 * (rc->channels[0] - 1501)/500;
+        footraiseheight = 0.1;
+        bodyheight      = 0.1;
+    }
+
+    if (rc->channels[0] < 1400)
+    {
+        A1mode = 2;
+        Sspeed = -0.5 * (rc->channels[0] - 1501)/500;
+        footraiseheight = 0.1;
+        bodyheight      = 0.1;
+    }
+
+    if (rc->channels[1] > 1600)
+    {
+        A1mode = 2;
+        Fspeed = -0.5 * (rc->channels[1] - 1501)/500;
+        footraiseheight = 0.1;
+        bodyheight      = 0.1;
+    }
+
+    if (rc->channels[1] < 1400)
+    {
+        A1mode = 2;
+        Fspeed = -0.5 * (rc->channels[1] - 1501)/500;
+        footraiseheight = 0.1;
+        bodyheight      = 0.1;
+    }
+
+    if ((rc->channels[0] < 1600 && rc->channels[0] > 1400) && (rc->channels[1] < 1600 && rc->channels[1] > 1400)){
+        A1mode = 1;
+        Fspeed = 0.0;
+        Sspeed = 0.0;
+    }
+
+}
+
+
+int main(int argc, char **argv) 
+{
+    std::cout << "Communication level is set to HIGH-level." << std::endl
+              << "WARNING: Make sure the robot is standing on the ground." << std::endl
+              << "Press Enter to continue..." << std::endl;
+    
+
+    ros::init(argc, argv, "node_control_via_H12");
+    
+
+    ros::NodeHandle nh;
+
+
+    ros::Subscriber sub_channel_cb;
+    
+
+    Custom custom(HIGHLEVEL);
+    // InitEnvironment();
+
+    sub_channel_cb = nh.subscribe("/mavros/rc/in", 1, channel_cb);
+    LoopFunc loop_control("control_loop", custom.dt,    boost::bind(&Custom::RobotControl, &custom));
+    LoopFunc loop_udpSend("udp_send",     custom.dt, 3, boost::bind(&Custom::UDPSend,      &custom));
+    LoopFunc loop_udpRecv("udp_recv",     custom.dt, 3, boost::bind(&Custom::UDPRecv,      &custom));
+
+    loop_udpSend.start();
+    loop_udpRecv.start();
+    loop_control.start();
+
+    ros::spin();
+
+    return 0; 
+}

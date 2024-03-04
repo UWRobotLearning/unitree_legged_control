@@ -150,6 +150,7 @@ int main(int argc, char **argv)
     printf("Initiating ros_walk_udp..\n"); 
 
     ros::Publisher pub_high;
+    pub_high = nh.advertise<unitree_legged_msgs::HighState>("high_state", 1);
     unitree_legged_msgs::HighState high_state_ros;
 
     Custom custom(HIGHLEVEL);
