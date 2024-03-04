@@ -193,7 +193,7 @@ int main(int argc, char **argv)
     // InitEnvironment();
 
     sub_channel_cb = nh.subscribe("/mavros/rc/in", 1, channel_cb);
-    pub_high       = nh.advertise<unitree_legged_msgs::HighState>("high_state", 1);
+    pub_high       = nh.advertise<unitree_legged_msgs::HighState>("/high_state", 1);
     LoopFunc loop_control("control_loop", custom.dt,    boost::bind(&Custom::RobotControl, &custom));
     LoopFunc loop_udpSend("udp_send",     custom.dt, 3, boost::bind(&Custom::UDPSend,      &custom));
     LoopFunc loop_udpRecv("udp_recv",     custom.dt, 3, boost::bind(&Custom::UDPRecv,      &custom));
