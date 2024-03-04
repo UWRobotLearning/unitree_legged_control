@@ -20,6 +20,9 @@ float bodyheight      = 0.f;
 uint8_t A1mode = 0;
 float r = 0.f,p = 0.f,y = 0.f;
 
+ros::Publisher pub_high;
+unitree_legged_msgs::HighState high_state_ros;
+
 class Custom
 {
 public:
@@ -53,11 +56,16 @@ void Custom::UDPSend()
 void Custom::RobotControl() 
 {
     udp.GetRecv(state);
+    high_state_ros = state2rosMsg(state);
+    pub_high.publish(high_state_ros);
+
     cmd.mode = A1mode;
     cmd.footRaiseHeight = footraiseheight;
     cmd.bodyHeight      = bodyheight;
     cmd.forwardSpeed    = Fspeed;
     cmd.sideSpeed       = Sspeed;
+
+    
 
     udp.SetSend(cmd);
 
@@ -181,11 +189,11 @@ int main(int argc, char **argv)
 
     ros::Subscriber sub_channel_cb;
     
-
     Custom custom(HIGHLEVEL);
     // InitEnvironment();
 
     sub_channel_cb = nh.subscribe("/mavros/rc/in", 1, channel_cb);
+    pub_high       = nh.advertise<unitree_legged_msgs::HighState>("high_state", 1);
     LoopFunc loop_control("control_loop", custom.dt,    boost::bind(&Custom::RobotControl, &custom));
     LoopFunc loop_udpSend("udp_send",     custom.dt, 3, boost::bind(&Custom::UDPSend,      &custom));
     LoopFunc loop_udpRecv("udp_recv",     custom.dt, 3, boost::bind(&Custom::UDPRecv,      &custom));
