@@ -3,7 +3,7 @@
 # Configuration
 
  ```bash
-export UNITREE_SDK_VERSION=3_2
+export UNITREE_SDK_VERSION=3_3_3
 export UNITREE_LEGGED_SDK_PATH=~/catkin_ws/src/unitree_legged_control/unitree_legged_sdk
 export UNITREE_PLATFORM="arm64"
 ```
@@ -20,7 +20,7 @@ export UNITREE_PLATFORM="arm64"
 | SDK           | Low mode      | High mode     |
 | ------------- | ------------- | ------------- |
 | 3.2   |  ✅   |   ✅   |
-| 3.34  |  ✅   |   ❌   |
+| 3.34  |  ✅   |   ✅  |
 .
 .
 | 3.8   |   ✅  |   ❌   |
