@@ -43,14 +43,25 @@ UNITREE_LEGGED_SDK::HighCmd rosMsg2Cmd(const unitree_legged_msgs::HighCmd::Const
     cmd.bandWidth   = msg->bandWidth;
     cmd.mode        = msg->mode;
 
-    cmd.forwardSpeed = msg->forwardSpeed;
-    cmd.sideSpeed    = msg->sideSpeed;
-    cmd.rotateSpeed  = msg->rotateSpeed;
-    cmd.bodyHeight = msg->bodyHeight;
+    cmd.gaitType = msg->gaitType;
+    cmd.speedLevel = msg->speedLevel;
     cmd.footRaiseHeight = msg->footRaiseHeight;
-    cmd.yaw             = msg->yaw;
-    cmd.pitch           = msg->pitch;
-    cmd.roll            = msg->roll;
+    cmd.bodyHeight = msg->bodyHeight;
+
+
+
+    for (int i(0); i < 2; i++)
+    {
+        cmd.position[i] = msg->position[i];
+        cmd.velocity[i] = msg->velocity[i];
+    }
+
+    for (int i(0); i < 3; i++)
+    {
+        cmd.euler[i] = msg->euler[i];
+    }
+
+    cmd.yawSpeed = msg->yawSpeed;
     
     for (int i(0); i < 4; i++)
     {
@@ -62,11 +73,12 @@ UNITREE_LEGGED_SDK::HighCmd rosMsg2Cmd(const unitree_legged_msgs::HighCmd::Const
     for (int i(0); i < 40; i++)
     {
         cmd.wirelessRemote[i] = msg->wirelessRemote[i];
-        cmd.AppRemote[i]      = msg->AppRemote[i];
     }
 
     cmd.reserve = msg->reserve;
     cmd.crc = msg->crc;
+
+
     return cmd;
 }
 
@@ -155,6 +167,7 @@ unitree_legged_msgs::IMU state2rosMsg(UNITREE_LEGGED_SDK::IMU &state)
     {
         ros_msg.gyroscope[i] = state.gyroscope[i];
         ros_msg.accelerometer[i] = state.accelerometer[i];
+        ros_msg.rpy[i] = state.rpy[i];
     }
 
     ros_msg.temperature = state.temperature;
@@ -243,26 +256,13 @@ unitree_legged_msgs::HighState state2rosMsg(UNITREE_LEGGED_SDK::HighState &state
     ros_msg.robotID     = state.robotID;
     ros_msg.SN          = state.SN;
     ros_msg.bandWidth   = state.bandWidth;
-    ros_msg.mode = state.mode;
-
-    
 
     ros_msg.imu = state2rosMsg(state.imu);
 
-    ros_msg.forwardSpeed   = state.forwardSpeed;
-    ros_msg.sideSpeed      = state.sideSpeed;
-    ros_msg.rotateSpeed    = state.rotateSpeed;
-    ros_msg.bodyHeight      = state.bodyHeight;
-    ros_msg.updownSpeed     = state.updownSpeed;
-    ros_msg.forwardPosition = state.forwardPosition;
-    ros_msg.sidePosition    = state.sidePosition;
-
-    //Gonna add this so that we can receive motor state along with the remaining high state values
-    // for (int i(0); i < 20; i++)
-    // {
-    //     ros_msg.motorState[i] = state2rosMsg(state.motorState[i]);
-    // }
-
+    for (int i(0); i < 20; i++)
+    {
+        ros_msg.motorState[i] = state2rosMsg(state.motorState[i]);
+    }
 
     for (int i(0); i < 4; i++)
     {
@@ -271,7 +271,20 @@ unitree_legged_msgs::HighState state2rosMsg(UNITREE_LEGGED_SDK::HighState &state
         ros_msg.footPosition2Body[i] = state2rosMsg(state.footPosition2Body[i]);
         ros_msg.footSpeed2Body[i] = state2rosMsg(state.footSpeed2Body[i]);
     }
-    ros_msg.tick = state.tick;
+
+    for (int i(0); i < 3; i++)
+    {
+        ros_msg.position[i] = state.position[i];
+        ros_msg.velocity[i] = state.velocity[i];
+    }
+
+    ros_msg.mode = state.mode;
+    ros_msg.progress = state.progress;
+    ros_msg.gaitType = state.gaitType;
+    ros_msg.footRaiseHeight = state.footRaiseHeight;
+    ros_msg.bodyHeight = state.bodyHeight;
+    ros_msg.yawSpeed = state.yawSpeed;
+
     for (int i(0); i < 40; i++)
     {
         ros_msg.wirelessRemote[i] = state.wirelessRemote[i];
@@ -288,23 +301,25 @@ UNITREE_LEGGED_SDK::HighCmd rosMsg2Cmd(const geometry_msgs::Twist::ConstPtr &msg
     
     cmd.levelFlag = UNITREE_LEGGED_SDK::HIGHLEVEL;
     cmd.mode = 0;
-
-
+    cmd.gaitType = 0;
+    cmd.speedLevel = 0;
     cmd.footRaiseHeight = 0;
     cmd.bodyHeight = 0;
-    cmd.roll = 0;
-    cmd.yaw = 0;
-    cmd.pitch = 0;
-    cmd.forwardSpeed = 0.0f;
-    cmd.sideSpeed = 0.0f;
-    cmd.rotateSpeed = 0.0f;
+    cmd.euler[0] = 0;
+    cmd.euler[1] = 0;
+    cmd.euler[2] = 0;
+    cmd.velocity[0] = 0.0f;
+    cmd.velocity[1] = 0.0f;
+    cmd.yawSpeed = 0.0f;
     cmd.reserve = 0;
 
-    cmd.forwardSpeed = msg->linear.x;
-    cmd.sideSpeed = msg->linear.y;
-    cmd.rotateSpeed = msg->angular.z;
+    cmd.velocity[0] = msg->linear.x;
+    cmd.velocity[1] = msg->linear.y;
+    cmd.yawSpeed = msg->angular.z;
 
     cmd.mode = 2;
+    cmd.gaitType = 1;
+
     return cmd;
 }
 

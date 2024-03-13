@@ -43,6 +43,22 @@ elseif( $ENV{UNITREE_SDK_VERSION} STREQUAL "3_2")
     add_executable(lcm_server_3_2 $ENV{UNITREE_LEGGED_SDK_PATH}/examples/lcm_server.cpp)
     target_link_libraries(lcm_server_3_2 ${EXTRA_LIBS} ${catkin_LIBRARIES})
     add_dependencies(lcm_server_3_2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+elseif($ENV{UNITREE_SDK_VERSION} STREQUAL "3_3_3")
+    include_directories($ENV{UNITREE_LEGGED_SDK_PATH}/include)
+    link_directories($ENV{UNITREE_LEGGED_SDK_PATH}/lib)
+    string(CONCAT LEGGED_SDK_NAME libunitree_legged_sdk_$ENV{UNITREE_PLATFORM}.so)
+    set(EXTRA_LIBS ${LEGGED_SDK_NAME} lcm)
+
+    add_definitions(-DSDK3_3_3)
+
+    add_executable(lcm_server_high_3_3_3 $ENV{UNITREE_LEGGED_SDK_PATH}/examples/lcm_server_high.cpp)
+    target_link_libraries(lcm_server_high_3_3_3 ${EXTRA_LIBS} ${catkin_LIBRARIES})
+    add_dependencies(lcm_server_high_3_3_3 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+    add_executable(lcm_server_low_3_3_3 $ENV{UNITREE_LEGGED_SDK_PATH}/examples/lcm_server_low.cpp)
+    target_link_libraries(lcm_server_low_3_3_3 ${EXTRA_LIBS} ${catkin_LIBRARIES})
+    add_dependencies(lcm_server_low_3_3_3 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 endif()
 
 add_executable(state_sub src/exe/state_sub.cpp)
@@ -57,14 +73,14 @@ add_executable(ros_udp_high src/exe/ros_udp_high.cpp)
 target_link_libraries(ros_udp_high ${EXTRA_LIBS} ${catkin_LIBRARIES})
 add_dependencies(ros_udp_high ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(ros_udp_walk src/exe/ros_udp_walk.cpp)
-target_link_libraries(ros_udp_walk ${EXTRA_LIBS} ${catkin_LIBRARIES})
-add_dependencies(ros_udp_walk ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_executable(ros_udp_walk src/exe/ros_udp_walk.cpp)
+# target_link_libraries(ros_udp_walk ${EXTRA_LIBS} ${catkin_LIBRARIES})
+# add_dependencies(ros_udp_walk ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(control_via_keyboard src/exe/control_via_keyboard.cpp)
 target_link_libraries(control_via_keyboard ${EXTRA_LIBS} ${catkin_LIBRARIES})
 add_dependencies(control_via_keyboard ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(control_via_H12 src/exe/control_via_H12.cpp)
-target_link_libraries(control_via_H12 ${EXTRA_LIBS} ${catkin_LIBRARIES})
-add_dependencies(control_via_H12 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_executable(control_via_H12 src/exe/control_via_H12.cpp)
+# target_link_libraries(control_via_H12 ${EXTRA_LIBS} ${catkin_LIBRARIES})
+# add_dependencies(control_via_H12 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
