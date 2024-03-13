@@ -15,6 +15,10 @@ export UNITREE_PLATFORM="arm64"
 # Possible Solutions
 - If we can upgrade the A1_sports version from 1.16 to 1.20 or above, then it resolves everything.
 
+# Problems resolved :
+- A1_sport version less than 1.20.
+- 3.2 sdk incompatible for sending and receiving high level commands and low level commands respectively.
+
 # SDKs
 
 | SDK           | Low mode      | High mode     |

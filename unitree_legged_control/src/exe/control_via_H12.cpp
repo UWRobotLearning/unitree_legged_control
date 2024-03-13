@@ -12,13 +12,17 @@
 
 using namespace UNITREE_LEGGED_SDK;
 
+
 float Fspeed = 0.f;
 float Sspeed = 0.f;
+float Yspeed = 0.f;
 float footraiseheight = 0.f;
 float bodyheight      = 0.f;
 float r = 0.f,p = 0.f,y = 0.f;
-
 uint8_t A1mode = 0;
+uint8_t gaitType = 0;
+uint8_t speedLevel = 0;
+
 
 ros::Publisher pub_high;
 unitree_legged_msgs::HighState high_state_ros;
@@ -59,14 +63,17 @@ void Custom::RobotControl()
     high_state_ros = state2rosMsg(state);
     pub_high.publish(high_state_ros);
 
-    cmd.mode = A1mode;
+    cmd.mode            = A1mode;
+    cmd.gaitType        = gaitType;
+    cmd.speedLevel      = speedLevel;
     cmd.footRaiseHeight = footraiseheight;
     cmd.bodyHeight      = bodyheight;
-    cmd.forwardSpeed    = Fspeed;
-    cmd.sideSpeed       = Sspeed;
-    cmd.roll            = r;
-    cmd.pitch           = p;
-
+    cmd.velocity[0]     = Fspeed;
+    cmd.velocity[1]     = Sspeed;
+    cmd.yawSpeed        = Yspeed;
+    cmd.euler[0]        = r;
+    cmd.euler[1]        = p;
+    cmd.euler[2]        = y;
     udp.SetSend(cmd);
 
 }
@@ -87,8 +94,13 @@ void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
     channel 2 for (up,   down)  . channel space (1950, 1050) => sideSpeed smd space (-1, +1)
     */
     A1mode = 0;      // 0:idle, default stand      1:forced stand     2:walk continuously
+    gaitType = 0;
     footraiseheight = 0;
     bodyheight = 0;
+    
+    Fspeed      = 0.f;
+    Sspeed      = 0.f;
+    Yspeed      = 0.f;
 
     /* Init rpy in place of eulers[3] (which is used in 3.3.1)*/
     
