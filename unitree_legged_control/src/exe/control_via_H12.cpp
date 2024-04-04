@@ -110,75 +110,75 @@ void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
 
     /*Init forward and side speed in place of velocity[2](which is used in 3.2)*/
 
-    float speedFactor = rc->channels[11]/1950;
-    float rpyFactor   = rc->channels[10]/1950;
-
-    if (rc->channels[0] > 1600)
+    float speedFactor = (float)(rc->channels[11])/2500.0;
+    float rpyFactor   = (float)(rc->channels[10])/2500.0;
+    cout<<"speedfactor is "<<speedFactor<<endl;
+    if (rc->channels[0] > 1500)
     {
         A1mode = 2;
-        Sspeed = -speedFactor * (rc->channels[0] - 1501)/500;
+        Sspeed = -speedFactor * (rc->channels[0] - 1500)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
 
-    if (rc->channels[0] < 1400)
+    if (rc->channels[0] < 1500)
     {
         A1mode = 2;
-        Sspeed = -speedFactor * (rc->channels[0] - 1501)/500;
+        Sspeed = -speedFactor * (rc->channels[0] - 1500)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
 
-    if (rc->channels[1] > 1600)
+    if (rc->channels[1] > 1500)
     {
         A1mode = 2;
-        Fspeed = -speedFactor * (rc->channels[1] - 1501)/500;
+        Fspeed = -speedFactor * (rc->channels[1] - 1500)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
 
-    if (rc->channels[1] < 1400)
+    if (rc->channels[1] < 1500)
     {
         A1mode = 2;
-        Fspeed = -speedFactor * (rc->channels[1] - 1501)/500;
+        Fspeed = -speedFactor * (rc->channels[1] - 1500)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
 
-    if ((rc->channels[0] < 1600 && rc->channels[0] > 1400) && (rc->channels[1] < 1600 && rc->channels[1] > 1400)){
+    if ((rc->channels[0] < 1500 && rc->channels[0] > 1500) && (rc->channels[1] < 1500 && rc->channels[1] > 1500)){
         A1mode = 1;
         Fspeed = 0.0;
         Sspeed = 0.0;
     }
 
-    if (rc->channels[2] > 1600)
+    if (rc->channels[2] > 1500)
     {
         A1mode = 1;
-        r = -rpyFactor * (rc->channels[2] - 1501)/500;
+        r = -rpyFactor * (rc->channels[2] - 1500)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
 
-    if (rc->channels[2] < 1400)
+    if (rc->channels[2] < 1500)
     {
         A1mode = 1;
-        r = -rpyFactor * (rc->channels[2] - 1501)/500;
+        r = -rpyFactor * (rc->channels[2] - 1500)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
 
-    if (rc->channels[3] > 1600)
+    if (rc->channels[3] > 1500)
     {
         A1mode = 1;
-        p = -rpyFactor * (rc->channels[3] - 1501)/500;
+        p = -rpyFactor * (rc->channels[3] - 1500)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
 
-    if (rc->channels[3] < 1400)
+    if (rc->channels[3] < 1500)
     {
         A1mode = 1;
-        p = -rpyFactor * (rc->channels[3] - 1501)/500;
+        p = -rpyFactor * (rc->channels[3] - 1500)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }

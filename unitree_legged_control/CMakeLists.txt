@@ -84,3 +84,7 @@ add_dependencies(control_via_keyboard ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 add_executable(control_via_H12 src/exe/control_via_H12.cpp)
 target_link_libraries(control_via_H12 ${EXTRA_LIBS} ${catkin_LIBRARIES})
 add_dependencies(control_via_H12 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(position_control_via_H12 src/exe/position_control_via_H12.cpp)
+target_link_libraries(position_control_via_H12 ${EXTRA_LIBS} ${catkin_LIBRARIES})
+add_dependencies(position_control_via_H12 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
