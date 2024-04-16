@@ -22,6 +22,7 @@ float r = 0.f,p = 0.f,y = 0.f;
 uint8_t A1mode = 0;
 uint8_t gaitType = 0;
 uint8_t speedLevel = 0;
+uint64_t waitCounter = 0;
 
 
 ros::Publisher pub_high;
@@ -78,6 +79,18 @@ void Custom::RobotControl()
 
 }
 
+/*
+Issues with multiplexing
+
+When the signal is less than 1550, it changes mode from 2 to 1 abruptly 
+and that leads to an unstable stance. 
+
+Perhaps letting it trot for sometime
+before changing mode could be a good way of stablizing it, or perhaps set to 1
+the moment it becomes stable.
+
+*/
+
 void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
     if(rc->channels.empty())
     {   
@@ -110,75 +123,56 @@ void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
 
     /*Init forward and side speed in place of velocity[2](which is used in 3.2)*/
 
+    // Changing gains using RC
     float speedFactor = (float)(rc->channels[11])/2500.0;
     float rpyFactor   = (float)(rc->channels[10])/2500.0;
-    cout<<"speedfactor is "<<speedFactor<<endl;
-    if (rc->channels[0] > 1500)
-    {
-        A1mode = 2;
-        Sspeed = -speedFactor * (rc->channels[0] - 1500)/500;
-        footraiseheight = 0.1;
-        bodyheight      = 0.1;
-    }
 
-    if (rc->channels[0] < 1500)
+    //Check if the Robot has halted
+    if ((rc->channels[0] < 1550  && rc->channels[0] > 1450) && (rc->channels[1] < 1550 && rc->channels[1] > 1450))
     {
-        A1mode = 2;
-        Sspeed = -speedFactor * (rc->channels[0] - 1500)/500;
-        footraiseheight = 0.1;
-        bodyheight      = 0.1;
-    }
-
-    if (rc->channels[1] > 1500)
-    {
-        A1mode = 2;
-        Fspeed = -speedFactor * (rc->channels[1] - 1500)/500;
-        footraiseheight = 0.1;
-        bodyheight      = 0.1;
-    }
-
-    if (rc->channels[1] < 1500)
-    {
-        A1mode = 2;
-        Fspeed = -speedFactor * (rc->channels[1] - 1500)/500;
-        footraiseheight = 0.1;
-        bodyheight      = 0.1;
-    }
-
-    if ((rc->channels[0] < 1500 && rc->channels[0] > 1500) && (rc->channels[1] < 1500 && rc->channels[1] > 1500)){
-        A1mode = 1;
+        //If wait counter exceeds 2000 i.e. 2000*0.002 = 4 seconds, then we can safely switch the mode to 1
+        if (waitCounter > 2000){
+             waitCounter = 0;
+             A1mode = 0;
+        }
         Fspeed = 0.0;
         Sspeed = 0.0;
+        waitCounter++;
+    }
+    else{
+        waitCounter = 0;
     }
 
-    if (rc->channels[2] > 1500)
+    // Side speed and Front speed
+    if (rc->channels[0] > 1550 || rc->channels[0] < 1450)
     {
-        A1mode = 1;
-        r = -rpyFactor * (rc->channels[2] - 1500)/500;
+        A1mode = 2;
+        Sspeed = -speedFactor * (rc->channels[0] - 1500)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
 
-    if (rc->channels[2] < 1500)
+    if (rc->channels[1] > 1550 || rc->channels[1] < 1450)
     {
-        A1mode = 1;
-        r = -rpyFactor * (rc->channels[2] - 1500)/500;
+        A1mode = 2;
+        Fspeed = -speedFactor * (rc->channels[1] - 1500)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
 
-    if (rc->channels[3] > 1500)
+    // Roll and pitch
+    if (rc->channels[2] > 1550 || rc->channels[2] < 1550)
     {
-        A1mode = 1;
-        p = -rpyFactor * (rc->channels[3] - 1500)/500;
+        A1mode = 0;
+        p = -rpyFactor * (rc->channels[2] - 1550)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
 
-    if (rc->channels[3] < 1500)
+    if (rc->channels[3] > 1550 || rc->channels[3] < 1550)
     {
-        A1mode = 1;
-        p = -rpyFactor * (rc->channels[3] - 1500)/500;
+        A1mode = 0;
+        r = -rpyFactor * (rc->channels[3] - 1550)/500;
         footraiseheight = 0.1;
         bodyheight      = 0.1;
     }
