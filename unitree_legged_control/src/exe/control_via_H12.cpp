@@ -132,35 +132,36 @@ void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
         A1mode = 0;
         Fspeed = 0.0;
         Sspeed = 0.0;
+        Yspeed = 0.0;
     }
-    else
+    //yawspeed
+       if (rc->channels[3] > 1550 || rc->channels[3] < 1450)
     {
-        // Side speed and Front speed
-        if (rc->channels[0] > 1550 || rc->channels[0] < 1450)
-        {
-            A1mode = 2;
-            Sspeed = speedFactor * (rc->channels[0] - 1500)/500;
-        }
-
-        if (rc->channels[1] > 1550 || rc->channels[1] < 1450)
-        {
-            A1mode = 2;
-            Fspeed = speedFactor * (rc->channels[1] - 1500)/500;
-        }
-
-        // Roll and pitch
-        if (rc->channels[2] > 1550 || rc->channels[2] < 1450)
-        {
-            A1mode = 0;
-            p = -rpyFactor * (rc->channels[2] - 1500)/500;
-        }
-
-        if (rc->channels[3] > 1550 || rc->channels[3] < 1450)
-        {
-            A1mode = 0;
-            r = -rpyFactor * (rc->channels[3] - 1500)/500;
+        A1mode = 2;
+        Yspeed = -rpyFactor * (rc->channels[3] - 1500)/100;
     }
-    }   
+
+    // Side speed and Front speed
+    if (rc->channels[0] > 1550 || rc->channels[0] < 1450)
+    {
+        A1mode = 2;
+        Sspeed = speedFactor * (rc->channels[0] - 1500)/500;
+    }
+
+    if (rc->channels[1] > 1550 || rc->channels[1] < 1450)
+    {
+        A1mode = 2;
+        Fspeed = speedFactor * (rc->channels[1] - 1500)/500;
+    }
+
+    // Roll and pitch
+    if (rc->channels[2] > 1550 || rc->channels[2] < 1450)
+    {
+        A1mode = 1;
+        p = -rpyFactor * (rc->channels[2] - 1500)/500;
+    }
+
+ 
 }
 
 
