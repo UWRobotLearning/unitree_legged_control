@@ -184,10 +184,16 @@ msg => steering_angle, speed
                         |                       |
                          - - - -  - - - - - - - 
                             initial theta
-        wheelspeed = ([0, 17] - 8.5)/8.5=>  =>[-1, 1]
-        S (wheelspeed) =>  [Scaling and Normalize] => Fspeed
 
+    wheelspeed = ([0, 17] - 8.5)/8.5=>  =>[-1, 1]
+    S (wheelspeed) =>  [Scaling and Normalize] => Fspeed
+
+
+    TBD:
+        1. Check steering angles and yaw orientation using pj
+        2. Ch
 */
+
 void mppi_cb(){
     //Check if user has permitted MPPI
     if (!MPPI_flag){
@@ -199,7 +205,7 @@ void mppi_cb(){
 /*
 
 Subscibe to /camera/depth/image_rect_raw
-and /camera/color/image_rect_raw to 
+and /camera/color/image_rect_raw to ∂]=\
 get depth and rgb data. 
 
 ODT
@@ -245,12 +251,14 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
 
 
-    ros::Subscriber sub_h12_cb;
+    ros::Subscriber sub_h12_cb, sub_mppi_cb;
     
     Custom custom(HIGHLEVEL);
     // InitEnvironment();
 
     sub_h12_cb = nh.subscribe("/mavros/rc/in", 1, h12_cb);
+    sub_mppi_cb = nh.subscribe("/low_level_controller/dawg/control", mppi_cb);
+
     pub_high       = nh.advertise<unitree_legged_msgs::HighState>("high_state", 1);
     LoopFunc loop_control("control_loop", custom.dt,    boost::bind(&Custom::RobotControl, &custom));
     LoopFunc loop_udpSend("udp_send",     custom.dt, 3, boost::bind(&Custom::UDPSend,      &custom));
