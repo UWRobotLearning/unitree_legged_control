@@ -19,12 +19,15 @@ float Yspeed          = 0.f;
 float footraiseheight = 0.f;
 float bodyheight      = 0.f;
 float r = 0.f, p = 0.f, y = 0.f;
+float auto_steering_init = 0.f;
+float 
 uint8_t A1mode = 0;
 uint8_t gaitType = 0;
 uint8_t speedLevel = 0;
 
 bool MPPI_flag = false;
 bool ODT_flag  = false;
+bool steer_flag = false;
 
 
 ros::Publisher pub_high;
@@ -188,11 +191,6 @@ msg => steering_angle, speed
 
     wheelspeed = ([0, 17] - 8.5)/8.5=>  =>[-1, 1]
     S (wheelspeed) =>  [Scaling and Normalize] => Fspeed
-
-
-    TBD:
-        1. Check steering angles and yaw orientation using pj
-        2. Ch
 */
 
 void mppi_cb(const ackermann_msgs::AckermannDriveStamped::ConstPtr commands ){
@@ -200,9 +198,19 @@ void mppi_cb(const ackermann_msgs::AckermannDriveStamped::ConstPtr commands ){
     if (!MPPI_flag){
         return;
     }
+    auto_steering   = commands->drive.steering_angle;
+    auto_wheelspeed = commands->drive.speed;
 
+    Fspeed =  (auto_wheelspeed - 8.5)/8.5;
+
+    /*
+    Ideally we are targetting the steering angle,
+    if we target steering angle, might as well as use a PID.
+    for now only using a P with kp = 10 since 10 * steeringmax = 10*0.47 = 4.7 that
+    can be assumed as 4.7rad/s
+    */
+    Yspeed =  auto_steering * 10;
 }
-
 /*
 
 Subscibe to /camera/depth/image_rect_raw
@@ -218,7 +226,6 @@ void odt_cb(){
     }
 
 }
-
 /*
 
 Go directly to a waypoint or follow a bunch of waypoints
@@ -237,7 +244,6 @@ void traverse_waypoints(){
     */
 
 }
-
 
 int main(int argc, char **argv) 
 {
