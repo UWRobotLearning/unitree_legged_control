@@ -22,6 +22,9 @@ uint8_t A1mode = 0;
 uint8_t gaitType = 0;
 uint8_t speedLevel = 0;
 
+bool MPPI_flag = false;
+bool ODT_flag  = false;
+
 
 ros::Publisher pub_high;
 unitree_legged_msgs::HighState high_state_ros;
@@ -81,6 +84,15 @@ void h12_cb(const mavros_msgs::RCIn::ConstPtr rc){
     {   
         return;
     }
+    /*
+    TBD: 
+    if mppi button clicked, set the mppi flag as high
+
+    if ODT button clicked, set the ODT flag as high
+    
+    */
+
+
     /*
     Right joystick
     forward/backward left/right speed
@@ -154,14 +166,35 @@ void h12_cb(const mavros_msgs::RCIn::ConstPtr rc){
 Subscribe to low_level_controller/dawg/control
 for getting control outputs from MPPI
 
+msg => steering_angle, speed
+    where 
+    steering_angle (theta)  = ctrl[0] * self.steering_max
+    speed (S)          = ctrl[1] * self.throttle_to_wheelspeed
 
-ODT
+    steering_max =  0.488 from Dynamics_config from dawg_mppi.yaml file
+    throttle_to_wheelspeed = 17.0 from Dynamics_config from dawg_mppi.yaml file
+
+
+    Wheeled to dawg control conversion 
+
+    (theta, S) => [wheeled to dawg] => [YawSpeed, Fspeed, Sspeed]
+
+       desired theta -> x -> PD -> YawSpeed -> Dawg
+                        ^                       |
+                        |                       |
+                         - - - -  - - - - - - - 
+                            initial theta
+        wheelspeed = ([0, 17] - 8.5)/8.5=>  =>[-1, 1]
+        S (wheelspeed) =>  [Scaling and Normalize] => Fspeed
+
 */
 void mppi_cb(){
+    //Check if user has permitted MPPI
+    if (!MPPI_flag){
+        return;
+    }
 
 }
-
-
 
 /*
 
@@ -169,11 +202,15 @@ Subscibe to /camera/depth/image_rect_raw
 and /camera/color/image_rect_raw to 
 get depth and rgb data. 
 
+ODT
 */
 void odt_cb(){
+    //Check if user has permitted object detection and tracking
+    if (!ODT_flag){
+        return ;
+    }
 
 }
-
 
 /*
 
@@ -188,6 +225,9 @@ subscribe to /path since it gets published after
       calculated from lat and long in NED frame.
 */
 void traverse_waypoints(){
+    /*
+    Check if there is a live path
+    */
 
 }
 
@@ -199,7 +239,7 @@ int main(int argc, char **argv)
               << "Press Enter to continue..." << std::endl;
     
 
-    ros::init(argc, argv, "node_control_via_H12");
+    ros::init(argc, argv, "node_A1_control");
     
 
     ros::NodeHandle nh;

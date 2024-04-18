@@ -190,7 +190,7 @@ int main(int argc, char **argv)
               << "Press Enter to continue..." << std::endl;
     
 
-    ros::init(argc, argv, "node_control_via_H12");
+    ros::init(argc, argv, "node_A1_control");
     
 
     ros::NodeHandle nh;
