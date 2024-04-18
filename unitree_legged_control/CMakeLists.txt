@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
     image_transport
     sensor_msgs
     geometry_msgs
+    vesc_msgs
     unitree_legged_msgs
     mavros_msgs
 )

@@ -4,6 +4,7 @@
 #include <unitree_legged_msgs/LowCmd.h>
 #include <unitree_legged_msgs/LowState.h>
 #include "unitree_legged_sdk/unitree_legged_sdk.h"
+#include "ackermann_msgs/AckermannDriveStamped.h"
 #include "mavros_msgs/RCIn.h"
 #include "convert.h"
 #include <chrono>
@@ -194,7 +195,7 @@ msg => steering_angle, speed
         2. Ch
 */
 
-void mppi_cb(){
+void mppi_cb(const ackermann_msgs::AckermannDriveStamped::ConstPtr commands ){
     //Check if user has permitted MPPI
     if (!MPPI_flag){
         return;
@@ -251,13 +252,14 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
 
 
-    ros::Subscriber sub_h12_cb, sub_mppi_cb;
+    ros::Subscriber sub_h12_cb;
+    ros::Subscriber sub_mppi_cb;
     
     Custom custom(HIGHLEVEL);
     // InitEnvironment();
 
     sub_h12_cb = nh.subscribe("/mavros/rc/in", 1, h12_cb);
-    sub_mppi_cb = nh.subscribe("/low_level_controller/dawg/control", mppi_cb);
+    sub_mppi_cb = nh.subscribe("/low_level_controller/dawg/control", 1, mppi_cb);
 
     pub_high       = nh.advertise<unitree_legged_msgs::HighState>("high_state", 1);
     LoopFunc loop_control("control_loop", custom.dt,    boost::bind(&Custom::RobotControl, &custom));
