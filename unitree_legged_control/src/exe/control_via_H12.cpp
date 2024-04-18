@@ -12,13 +12,12 @@
 
 using namespace UNITREE_LEGGED_SDK;
 
-
-float Fspeed = 0.f;
-float Sspeed = 0.f;
-float Yspeed = 0.f;
+float Fspeed          = 0.f;
+float Sspeed          = 0.f;
+float Yspeed          = 0.f;
 float footraiseheight = 0.f;
 float bodyheight      = 0.f;
-float r = 0.f,p = 0.f,y = 0.f;
+float r = 0.f, p = 0.f, y = 0.f;
 uint8_t A1mode = 0;
 uint8_t gaitType = 0;
 uint8_t speedLevel = 0;
@@ -43,7 +42,6 @@ public:
     HighState state = {0};
     int motiontime = 0;
     float dt = 0.002;     // 0.001~0.01
-
 };
 
 
@@ -78,32 +76,21 @@ void Custom::RobotControl()
 
 }
 
-/*
-Issues with multiplexing
-
-When the signal is less than 1550, it changes mode from 2 to 1 abruptly 
-and that leads to an unstable stance. 
-
-Perhaps letting it trot for sometime
-before changing mode could be a good way of stablizing it, or perhaps set to 1
-the moment it becomes stable.
-
-*/
-
-void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
+void h12_cb(const mavros_msgs::RCIn::ConstPtr rc){
     if(rc->channels.empty())
     {   
         return;
     }
     /*
     Right joystick
+    forward/backward left/right speed
     channel 0 for (left, right). channel space (2000, 1000) => sideSpeed cmd space (-1, +1)
     channel 1 for (up,   down) . channel space (2000, 1000) => forwardSpeed cmd space (-1, +1)
 
     Left joystick
-    roll pitch yaw?
-    channel 3 for (left, right) . channel space (1050, 1950) => sideSpeed cmd space (-1, +1)
-    channel 2 for (up,   down)  . channel space (1950, 1050) => sideSpeed smd space (-1, +1)
+    pitch yawspeed
+    channel 3 for yawspeed . channel space (1050, 1950) => yawspeed cmd space (-2.8, +2.8)
+    channel 2 for pitch (up,   down)  . channel space (1950, 1050) => sideSpeed smd space (-1, +1)
     */
     A1mode = 0;      // 0:idle, default stand      1:forced stand     2:walk continuously
     gaitType = 0;
@@ -115,7 +102,6 @@ void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
     Yspeed      = 0.f;
 
     /* Init rpy in place of eulers[3] (which is used in 3.3.1)*/
-    
     r = 0.f;
     p = 0.f;
     y = 0.f;
@@ -138,30 +124,71 @@ void channel_cb(const mavros_msgs::RCIn::ConstPtr rc){
        if (rc->channels[3] > 1550 || rc->channels[3] < 1450)
     {
         A1mode = 2;
+        //-2.8 to +2.8 rad/s
         Yspeed = -rpyFactor * (rc->channels[3] - 1500)/100;
     }
-
-    // Side speed and Front speed
+    // Side speed
     if (rc->channels[0] > 1550 || rc->channels[0] < 1450)
     {
         A1mode = 2;
         Sspeed = speedFactor * (rc->channels[0] - 1500)/500;
     }
-
+    //Front speed
     if (rc->channels[1] > 1550 || rc->channels[1] < 1450)
     {
         A1mode = 2;
         Fspeed = speedFactor * (rc->channels[1] - 1500)/500;
     }
 
-    // Roll and pitch
+    // pitch
     if (rc->channels[2] > 1550 || rc->channels[2] < 1450)
     {
         A1mode = 1;
         p = -rpyFactor * (rc->channels[2] - 1500)/500;
     }
+    //roll not used
+}
 
- 
+/*
+
+Subscribe to low_level_controller/dawg/control
+for getting control outputs from MPPI
+
+
+ODT
+*/
+void mppi_cb(){
+
+}
+
+
+
+/*
+
+Subscibe to /camera/depth/image_rect_raw
+and /camera/color/image_rect_raw to 
+get depth and rgb data. 
+
+*/
+void odt_cb(){
+
+}
+
+
+/*
+
+Go directly to a waypoint or follow a bunch of waypoints
+Subscribe to /mavros/mission/waypoints
+
+Or 
+
+subscribe to /path since it gets published after
+    - Calculating gps origin.
+    - Generating a path along all waypoints. Each waypoint will be a X,Y coordinate that is
+      calculated from lat and long in NED frame.
+*/
+void traverse_waypoints(){
+
 }
 
 
@@ -178,12 +205,12 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
 
 
-    ros::Subscriber sub_channel_cb;
+    ros::Subscriber sub_h12_cb;
     
     Custom custom(HIGHLEVEL);
     // InitEnvironment();
 
-    sub_channel_cb = nh.subscribe("/mavros/rc/in", 1, channel_cb);
+    sub_h12_cb = nh.subscribe("/mavros/rc/in", 1, h12_cb);
     pub_high       = nh.advertise<unitree_legged_msgs::HighState>("high_state", 1);
     LoopFunc loop_control("control_loop", custom.dt,    boost::bind(&Custom::RobotControl, &custom));
     LoopFunc loop_udpSend("udp_send",     custom.dt, 3, boost::bind(&Custom::UDPSend,      &custom));

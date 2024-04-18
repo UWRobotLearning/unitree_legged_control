@@ -5,6 +5,9 @@ add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    cv_bridge
+    image_transport
+    sensor_msgs
     geometry_msgs
     unitree_legged_msgs
     mavros_msgs
