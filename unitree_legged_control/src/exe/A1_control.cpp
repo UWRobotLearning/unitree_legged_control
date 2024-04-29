@@ -19,8 +19,6 @@ float Yspeed          = 0.f;
 float footraiseheight = 0.f;
 float bodyheight      = 0.f;
 float r = 0.f, p = 0.f, y = 0.f;
-float auto_steering_init = 0.f;
-float 
 uint8_t A1mode = 0;
 uint8_t gaitType = 0;
 uint8_t speedLevel = 0;
@@ -79,6 +77,7 @@ void Custom::RobotControl()
     cmd.euler[0]        = r;
     cmd.euler[1]        = p;
     cmd.euler[2]        = y;
+    cout << "Mode : " << (int)A1mode <<endl;
     udp.SetSend(cmd);
 
 }
@@ -198,8 +197,8 @@ void mppi_cb(const ackermann_msgs::AckermannDriveStamped::ConstPtr commands ){
     if (!MPPI_flag){
         return;
     }
-    auto_steering   = commands->drive.steering_angle;
-    auto_wheelspeed = commands->drive.speed;
+    float auto_steering   = commands->drive.steering_angle;
+    float auto_wheelspeed = commands->drive.speed;
 
     Fspeed =  (auto_wheelspeed - 8.5)/8.5;
 

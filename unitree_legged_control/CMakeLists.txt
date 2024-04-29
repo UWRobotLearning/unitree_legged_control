@@ -89,6 +89,12 @@ add_executable(A1_control src/exe/A1_control.cpp)
 target_link_libraries(A1_control ${EXTRA_LIBS} ${catkin_LIBRARIES})
 add_dependencies(A1_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+
+add_executable(A1_reset src/exe/A1_reset.cpp)
+target_link_libraries(A1_reset ${EXTRA_LIBS} ${catkin_LIBRARIES})
+add_dependencies(A1_reset ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+
 add_executable(position_control_via_H12 src/exe/position_control_via_H12.cpp)
 target_link_libraries(position_control_via_H12 ${EXTRA_LIBS} ${catkin_LIBRARIES})
 add_dependencies(position_control_via_H12 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
