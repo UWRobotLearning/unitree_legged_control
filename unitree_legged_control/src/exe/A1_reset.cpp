@@ -130,7 +130,7 @@ int main(int argc, char **argv)
     ros::Subscriber sub_h12_cb;
     // ros::Subscriber sub_mppi_cb;
     
-    Custom custom(HIGHLEVEL);
+    Custom custom(LOWLEVEL);
     // InitEnvironment();
 
     sub_h12_cb = nh.subscribe("/mavros/rc/in", 1, h12_cb);

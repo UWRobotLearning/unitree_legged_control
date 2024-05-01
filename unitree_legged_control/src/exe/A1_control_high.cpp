@@ -26,6 +26,7 @@ uint8_t speedLevel = 0;
 bool MPPI_flag = false;
 bool ODT_flag  = false;
 bool steer_flag = false;
+bool reset_flag = false;
 
 
 ros::Publisher pub_high;
@@ -162,6 +163,25 @@ void h12_cb(const mavros_msgs::RCIn::ConstPtr rc){
         p = -rpyFactor * (rc->channels[2] - 1500)/500;
     }
     //roll not used
+
+    //recovery
+    if (rc->channels[8] > 1500)
+    {
+        if (!reset_flag){
+            A1mode = 8;
+            cout<<"recovery stand!"<<endl;
+            reset_flag = true;
+        }
+    }
+    else
+    {
+        if (reset_flag){
+            A1mode = 7;
+            cout<<"damping mode!"<<endl;
+            reset_flag = false;
+        }
+    }
+
 }
 
 /*

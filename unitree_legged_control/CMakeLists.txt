@@ -85,9 +85,9 @@ add_executable(control_via_keyboard src/exe/control_via_keyboard.cpp)
 target_link_libraries(control_via_keyboard ${EXTRA_LIBS} ${catkin_LIBRARIES})
 add_dependencies(control_via_keyboard ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(A1_control src/exe/A1_control.cpp)
-target_link_libraries(A1_control ${EXTRA_LIBS} ${catkin_LIBRARIES})
-add_dependencies(A1_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(A1_control_high src/exe/A1_control_high.cpp)
+target_link_libraries(A1_control_high ${EXTRA_LIBS} ${catkin_LIBRARIES})
+add_dependencies(A1_control_high ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 
 add_executable(A1_reset src/exe/A1_reset.cpp)
