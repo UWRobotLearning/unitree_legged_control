@@ -11,7 +11,7 @@
 <launch>
     <arg name="ctrl_level" default="highlevel"/>
 
-    <node pkg="unitree_legged_control" type="A1_control_high" name="node_A1_control_high" output="screen" args="$(arg ctrl_level)"/>
+    <node pkg="unitree_legged_control" type="A1_control" name="node_A1_control" output="screen" args="$(arg ctrl_level)"/>
 
    <!--<node pkg = "rosbag" type = "record" name = "a1bag" args = "-O /root/src/unitree_legged_control/unitree_legged_control/launch/bagfiles/a1bag.bag low_state/imu"/>-->
 

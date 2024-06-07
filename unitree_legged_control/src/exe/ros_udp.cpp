@@ -159,9 +159,9 @@ int main(int argc, char **argv)
 
 
     //custom.lowUdpSend();
-    custom.high_cmd.mode = 1;
+    // custom.high_cmd.mode = 1;
     custom.low_udp.SetSend(custom.low_cmd);
-    custom.high_udp.SetSend(custom.high_cmd);
+    // custom.high_udp.SetSend(custom.high_cmd);
 
     // if (strcasecmp(argv[1], "LOWLEVEL") == 0)
     // {

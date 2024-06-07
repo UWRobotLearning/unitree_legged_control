@@ -29,59 +29,108 @@ bool steer_flag = false;
 bool reset_flag = false;
 
 
-ros::Publisher pub_high;
+ros::Publisher pub_high, pub_low;
 unitree_legged_msgs::HighState high_state_ros;
+unitree_legged_msgs::LowState low_state_ros;
 
 class Custom
 {
 public:
-    Custom(uint8_t level): safe(LeggedType::A1), udp(8090, "192.168.123.161", 8082, sizeof(HighCmd), sizeof(HighState)){
-        udp.InitCmdData(cmd);
+    Custom(uint8_t level): safe(LeggedType::A1), low_udp(LOWLEVEL), high_udp(8090, "192.168.123.161", 8082, sizeof(HighCmd), sizeof(HighState)){
+        high_udp.InitCmdData(high_cmd);
+        cout << " high level" << endl;
+    };
+
+    Custom()
+        : 
+        safe(LeggedType::A1),
+        low_udp(LOWLEVEL),
+        high_udp(8090 , "192.168.123.161", 8082, sizeof(HighCmd), sizeof(HighState))
+    {
+        high_udp.InitCmdData(high_cmd);
+        low_udp.InitCmdData(low_cmd);
+        cout << "low mode" << endl;
     }
-    void UDPRecv();
-    void UDPSend();
-    void RobotControl();
+
+    void HighUDPRecv();
+    void HighUDPSend();
+    void HighRobotControl();
+
+    void LowUDPRecv();
+    void LowUDPSend();
+    void LowRobotControl();
 
     Safety safe;
-    UDP udp;
-    HighCmd cmd = {0};
-    HighState state = {0};
+    UDP high_udp;
+    UDP low_udp;
+    HighCmd high_cmd = {0};
+    HighState high_state = {0};
+    LowCmd low_cmd = {0};
+    LowState low_state = {0};
+
     int motiontime = 0;
     float dt = 0.002;     // 0.001~0.01
+
+    ~Custom(){
+        cout << "deleted level";
+    };
 };
 
 
-void Custom::UDPRecv()
+
+void Custom::HighUDPRecv()
 {
-    udp.Recv();
+    high_udp.Recv();
 }
 
-void Custom::UDPSend()
+void Custom::HighUDPSend()
 {  
-    udp.Send();
+    high_udp.Send();
 }
 
-void Custom::RobotControl() 
+void Custom::HighRobotControl() 
 {
-    udp.GetRecv(state);
-    high_state_ros = state2rosMsg(state);
+    high_udp.GetRecv(high_state);
+    high_state_ros = state2rosMsg(high_state);
     pub_high.publish(high_state_ros);
 
-    cmd.mode            = A1mode;
-    cmd.gaitType        = gaitType;
-    cmd.speedLevel      = speedLevel;
-    cmd.footRaiseHeight = footraiseheight;
-    cmd.bodyHeight      = bodyheight;
-    cmd.velocity[0]     = Fspeed;
-    cmd.velocity[1]     = Sspeed;
-    cmd.yawSpeed        = Yspeed;
-    cmd.euler[0]        = r;
-    cmd.euler[1]        = p;
-    cmd.euler[2]        = y;
-    cout << "Mode : " << (int)A1mode <<endl;
-    udp.SetSend(cmd);
+    high_cmd.mode            = A1mode;
+    high_cmd.gaitType        = gaitType;
+    high_cmd.speedLevel      = speedLevel;
+    high_cmd.footRaiseHeight = footraiseheight;
+    high_cmd.bodyHeight      = bodyheight;
+    high_cmd.velocity[0]     = Fspeed;
+    high_cmd.velocity[1]     = Sspeed;
+    high_cmd.yawSpeed        = Yspeed;
+    high_cmd.euler[0]        = r;
+    high_cmd.euler[1]        = p;
+    high_cmd.euler[2]        = y;
+    high_udp.SetSend(high_cmd);
 
 }
+
+void Custom::LowUDPRecv()
+{
+    low_udp.Recv();
+}
+
+void Custom::LowUDPSend()
+{  
+    low_udp.Send();
+}
+
+void Custom::LowRobotControl() 
+{
+    low_udp.GetRecv(low_state);
+    low_state_ros = state2rosMsg(low_state);
+    pub_high.publish(low_state_ros);
+    /*TODO send low level commands*/
+
+    low_udp.SetSend(low_cmd);
+
+}
+
+
 
 void h12_cb(const mavros_msgs::RCIn::ConstPtr rc){
     if(rc->channels.empty())
@@ -110,19 +159,15 @@ void h12_cb(const mavros_msgs::RCIn::ConstPtr rc){
     */
     A1mode = 0;      // 0:idle, default stand      1:forced stand     2:walk continuously
     gaitType = 0;
-    footraiseheight = 0;
-    bodyheight = 0;
-    
-    Fspeed      = 0.f;
-    Sspeed      = 0.f;
-    Yspeed      = 0.f;
 
     /* Init rpy in place of eulers[3] (which is used in 3.3.1)*/
     r = 0.f;
     p = 0.f;
     y = 0.f;
 
-    /*Init forward and side speed in place of velocity[2](which is used in 3.2)*/
+    /*Init forward and side speed in place of veloci
+    LowCmd low_cmd = {0};
+    LowState low_state = {0};ty[2](which is used in 3.2)*/
 
     // Changing gains using RC
     float speedFactor = (float)(rc->channels[11])/2000.0;
@@ -275,27 +320,45 @@ int main(int argc, char **argv)
     
 
     ros::NodeHandle nh;
-
-
     ros::Subscriber sub_h12_cb;
     ros::Subscriber sub_mppi_cb;
-    
-    Custom custom(HIGHLEVEL);
+
+
     // InitEnvironment();
 
     sub_h12_cb = nh.subscribe("/mavros/rc/in", 1, h12_cb);
     sub_mppi_cb = nh.subscribe("/low_level_controller/dawg/control", 1, mppi_cb);
-
     pub_high       = nh.advertise<unitree_legged_msgs::HighState>("high_state", 1);
-    LoopFunc loop_control("control_loop", custom.dt,    boost::bind(&Custom::RobotControl, &custom));
-    LoopFunc loop_udpSend("udp_send",     custom.dt, 3, boost::bind(&Custom::UDPSend,      &custom));
-    LoopFunc loop_udpRecv("udp_recv",     custom.dt, 3, boost::bind(&Custom::UDPRecv,      &custom));
+    pub_low       = nh.advertise<unitree_legged_msgs::LowState>("low_state", 1);
 
-    loop_udpSend.start();
-    loop_udpRecv.start();
-    loop_control.start();
+    if (strcasecmp(argv[1], "HIGHLEVEL") == 0){
+        cout<<"highlevel"<<endl;        
 
-    ros::spin();
+        Custom custom(HIGHLEVEL);
+        LoopFunc loop_control("control_loop", custom.dt,    boost::bind(&Custom::HighRobotControl, &custom));
+        LoopFunc loop_udpSend("udp_send",     custom.dt, 3, boost::bind(&Custom::HighUDPSend,      &custom));
+        LoopFunc loop_udpRecv("udp_recv",     custom.dt, 3, boost::bind(&Custom::HighUDPRecv,      &custom));
+
+        loop_udpSend.start();
+        loop_udpRecv.start();
+        loop_control.start(); 
+        ros::spin();
+    }
+
+    else if (strcasecmp(argv[1], "LOWLEVEL") == 0){
+        cout<<"lowlevel"<<endl;        
+        Custom custom;
+        // send low cmd for init
+        custom.low_udp.SetSend(custom.low_cmd);
+        // LoopFunc loop_control("control_loop", custom.dt,    boost::bind(&Custom::LowRobotControl, &custom));
+        LoopFunc loop_udpSend("udp_send",     custom.dt*10, 3, boost::bind(&Custom::LowUDPSend,      &custom));
+        LoopFunc loop_udpRecv("udp_recv",     custom.dt*10, 3, boost::bind(&Custom::LowUDPRecv,      &custom));
+
+        loop_udpSend.start();
+        loop_udpRecv.start();
+        // loop_control.start();
+        ros::spin();
+    }
 
     return 0; 
 }
